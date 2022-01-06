@@ -20,13 +20,18 @@ func PrintBanner() {
 	fmt.Println("Answer the questions. Press x if you'd like to exit.")
 }
 
-func RunSession() {
-	PrintBanner()
+func ReadYamlFiles() [2][2]string {
 	cases := [2][2]string{
 		{"book", "livro"},
 		{"apple", "manzana"},
 	}
 	//fmt.Println(len(cases))
+	return cases
+}
+
+func RunSession() {
+	PrintBanner()
+	cases := ReadYamlFiles()
 
 	for {
 		selected := rand.Intn(len(cases))
