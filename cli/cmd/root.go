@@ -7,20 +7,62 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
+
+type Course struct {
+	Course  map[interface{}]interface{} `yaml:"Course"`
+	Modules []string                    `yaml:"Modules"`
+}
 
 func PrintBanner() {
 	fmt.Println("Welcome!")
 	fmt.Println("Answer the questions. Press x if you'd like to exit.")
 }
 
-func ReadYamlFiles() [2][2]string {
+func ReadYamlFiles(fullpath string) [2][2]string {
+	course_yaml_file := filepath.Join(fullpath, "course.yaml")
+	//fmt.Println(course_yaml_file)
+	_, err := os.Stat(course_yaml_file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Printf("course.yaml file could not be found. Have you provided the path to the course directory?")
+			os.Exit(1)
+		}
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	yfile, err2 := ioutil.ReadFile(course_yaml_file)
+	if err2 != nil {
+		log.Fatal(err2)
+		os.Exit(1)
+	}
+	//data := make(map[interface{}]interface{})
+	//data := //make(map[string]Course)
+	var data Course
+	err3 := yaml.Unmarshal(yfile, &data)
+	if err3 != nil {
+		log.Fatal(err3)
+	}
+	fmt.Println(data.Course)
+	//fmt.Println(data.Course.Language)
+	fmt.Println(data.Modules)
+
+	// for k, v := range data["Modules"] {
+	// 	fmt.Printf("%s -> %d\n", k, v)
+	// }
+	os.Exit(0)
+
 	cases := [2][2]string{
 		{"book", "livro"},
 		{"apple", "manzana"},
@@ -29,9 +71,9 @@ func ReadYamlFiles() [2][2]string {
 	return cases
 }
 
-func RunSession() {
+func RunSession(fullpath string) {
+	cases := ReadYamlFiles(fullpath)
 	PrintBanner()
-	cases := ReadYamlFiles()
 
 	for {
 		selected := rand.Intn(len(cases))
@@ -58,7 +100,19 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		rand.Seed(time.Now().UnixNano())
-		RunSession()
+		var coursedir = "."
+		if len(args) >= 1 && args[0] != "" {
+			coursedir = args[0]
+		}
+
+		//fmt.Println(coursedir)
+		fullpath, err := filepath.Abs(coursedir)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err)
+			os.Exit(1)
+		}
+		//fmt.Println(fullpath)
+		RunSession(fullpath)
 	},
 }
 
