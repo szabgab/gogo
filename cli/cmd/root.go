@@ -19,9 +19,28 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Course struct {
-	Course  map[interface{}]interface{} `yaml:"Course"`
-	Modules []string                    `yaml:"Modules"`
+type Language struct {
+	Name string `yaml:"Name"`
+	Code string `yaml:"IETF BCP 47"`
+}
+
+type License struct {
+	Name      string `yaml:"Name"`
+	ShortName string `yaml:"Short name"`
+	Link      string `yaml:"Link"`
+}
+
+type CourseData struct {
+	Language    Language `yaml:"Language"`        // TargetLanguage
+	ForSpeakers Language `yaml:"For speakers of"` // SourceLanguage
+	License     License  `yaml:"License"`
+	Repository  string   `yaml:"Repository"`
+	Characters  []string `yaml:"Special characters"`
+}
+
+type CourseFile struct {
+	Course  CourseData `yaml:"Course"`
+	Modules []string   `yaml:"Modules"`
 }
 
 func PrintBanner() {
@@ -49,14 +68,16 @@ func ReadYamlFiles(fullpath string) [2][2]string {
 	}
 	//data := make(map[interface{}]interface{})
 	//data := //make(map[string]Course)
-	var data Course
+	var data CourseFile
 	err3 := yaml.Unmarshal(yfile, &data)
 	if err3 != nil {
 		log.Fatal(err3)
 	}
-	fmt.Println(data.Course)
+	//fmt.Println(data.Course.License.Name)
 	//fmt.Println(data.Course.Language)
 	fmt.Println(data.Modules)
+	//fmt.Println(data.Course.Language.Name)
+	//fmt.Println(data.Course.ForSpeakers.Name)
 
 	// for k, v := range data["Modules"] {
 	// 	fmt.Printf("%s -> %d\n", k, v)
