@@ -48,7 +48,7 @@ func PrintBanner() {
 	fmt.Println("Answer the questions. Press x if you'd like to exit.")
 }
 
-func ReadYamlFiles(fullpath string) [2][2]string {
+func ReadCourseYamlFile(fullpath string) CourseFile {
 	course_yaml_file := filepath.Join(fullpath, "course.yaml")
 	//fmt.Println(course_yaml_file)
 	_, err := os.Stat(course_yaml_file)
@@ -66,8 +66,6 @@ func ReadYamlFiles(fullpath string) [2][2]string {
 		log.Fatal(err2)
 		os.Exit(1)
 	}
-	//data := make(map[interface{}]interface{})
-	//data := //make(map[string]Course)
 	var data CourseFile
 	err3 := yaml.Unmarshal(yfile, &data)
 	if err3 != nil {
@@ -75,13 +73,45 @@ func ReadYamlFiles(fullpath string) [2][2]string {
 	}
 	//fmt.Println(data.Course.License.Name)
 	//fmt.Println(data.Course.Language)
-	fmt.Println(data.Modules)
 	//fmt.Println(data.Course.Language.Name)
 	//fmt.Println(data.Course.ForSpeakers.Name)
+	return data
+}
 
-	// for k, v := range data["Modules"] {
-	// 	fmt.Printf("%s -> %d\n", k, v)
-	// }
+type ModuleFile struct {
+	Module Module   `yaml:"Module"`
+	Skills []string `yaml:"Skills"`
+}
+
+type Module struct {
+	Name string `yaml:"Name"`
+}
+
+func ReadModuleYamlFile(fullpath string, name string) ModuleFile {
+	module_yaml_file := filepath.Join(fullpath, name, "module.yaml")
+	yfile, err := ioutil.ReadFile(module_yaml_file)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	var data ModuleFile
+	err = yaml.Unmarshal(yfile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Println(data)
+	return data
+}
+
+func ReadYamlFiles(fullpath string) [2][2]string {
+	course := ReadCourseYamlFile(fullpath)
+	//fmt.Println(course.Modules)
+	for _, name := range course.Modules {
+		//fmt.Printf("name: %s\n", name)
+		module := ReadModuleYamlFile(fullpath, name)
+		fmt.Println(module.Module.Name)
+	}
+
 	os.Exit(0)
 
 	cases := [2][2]string{
