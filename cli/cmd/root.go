@@ -120,10 +120,21 @@ type Phrase struct {
 	Translation string `yaml:"Translation"`
 }
 
+type MiniDictionary map[string]interface{}
+
 type Skill struct {
-	Meta    SkillMeta `yaml:"Skill"`
-	Words   []Word    `yaml:"New words"`
-	Phrases []Phrase  `yaml:"Phrases"`
+	Meta       SkillMeta                   `yaml:"Skill"`
+	Words      []Word                      `yaml:"New words"`
+	Phrases    []Phrase                    `yaml:"Phrases"`
+	Dictionary map[string][]MiniDictionary `yaml:"Mini-dictionary"`
+}
+
+func getKey(wordPair map[string]interface{}) string {
+	for key, _ := range wordPair {
+		return fmt.Sprint(key)
+	}
+	os.Exit(1)
+	return ""
 }
 
 func ReadSkillYamlFile(fullpath string, module_name string, skill_file string) Skill {
@@ -142,22 +153,23 @@ func ReadSkillYamlFile(fullpath string, module_name string, skill_file string) S
 	return data
 }
 
-func ParseSkills(skills []Skill) ([][2]string, [][2]string) {
-	fmt.Println("parse skills")
+func ParseSkills(course CourseFile, skills []Skill) ([][2]string, [][2]string) {
+	//fmt.Println("parse skills")
+
 	wordPairs := [][2]string{}
 	phrasePairs := [][2]string{}
-	//fmt.Println(len(skills))
-	//fmt.Println(skills[0])
 	for _, skill := range skills {
 		for _, word := range skill.Words {
-			//fmt.Println(word.Word)
-			//fmt.Println(word.Translation)
 			wordPairs = append(wordPairs, [2]string{word.Word, word.Translation})
 		}
 		for _, phrase := range skill.Phrases {
-			//fmt.Println(phrase)
-			//os.Exit(0)
 			phrasePairs = append(phrasePairs, [2]string{phrase.Phrase, phrase.Translation})
+		}
+		//sourceLanguage := course.Course.ForSpeakers.Name
+		targetLanguage := course.Course.Language.Name
+		for _, wordPair := range skill.Dictionary[targetLanguage] {
+			word := getKey(wordPair)
+			wordPairs = append(wordPairs, [2]string{word, fmt.Sprint(word)})
 		}
 	}
 
@@ -165,7 +177,7 @@ func ParseSkills(skills []Skill) ([][2]string, [][2]string) {
 
 }
 
-func ReadYamlFiles(fullpath string) []Skill {
+func ReadYamlFiles(fullpath string) (CourseFile, []Skill) {
 	course := ReadCourseYamlFile(fullpath)
 	skills := []Skill{}
 	//words := [][2]string{}
@@ -180,7 +192,7 @@ func ReadYamlFiles(fullpath string) []Skill {
 			skills = append(skills, skill)
 		}
 	}
-	return skills
+	return course, skills
 }
 
 // Given a map of name => value pairs, randomly return one of the names using the values as weights.
@@ -248,8 +260,8 @@ func runChallenge(cases [][2]string) bool {
 }
 
 func RunSession(fullpath string) {
-	skills := ReadYamlFiles(fullpath)
-	wordPairs, phrasePairs := ParseSkills(skills)
+	course, skills := ReadYamlFiles(fullpath)
+	wordPairs, phrasePairs := ParseSkills(course, skills)
 	//fmt.Println(wordPairs[0])
 	//fmt.Println("----------")
 	//os.Exit(0)
