@@ -19,30 +19,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Language struct {
-	Name string `yaml:"Name"`
-	Code string `yaml:"IETF BCP 47"`
-}
-
-type License struct {
-	Name      string `yaml:"Name"`
-	ShortName string `yaml:"Short name"`
-	Link      string `yaml:"Link"`
-}
-
-type CourseData struct {
-	Language    Language `yaml:"Language"`        // TargetLanguage
-	ForSpeakers Language `yaml:"For speakers of"` // SourceLanguage
-	License     License  `yaml:"License"`
-	Repository  string   `yaml:"Repository"`
-	Characters  []string `yaml:"Special characters"`
-}
-
-type CourseFile struct {
-	Course  CourseData `yaml:"Course"`
-	Modules []string   `yaml:"Modules"`
-}
-
 func PrintBanner() {
 	fmt.Println("Welcome!")
 	fmt.Println("Answer the questions. Press x if you'd like to exit.")
@@ -78,15 +54,6 @@ func ReadCourseYamlFile(fullpath string) CourseFile {
 	return data
 }
 
-type ModuleFile struct {
-	Module Module   `yaml:"Module"`
-	Skills []string `yaml:"Skills"`
-}
-
-type Module struct {
-	Name string `yaml:"Name"`
-}
-
 func ReadModuleYamlFile(fullpath string, name string) ModuleFile {
 	module_yaml_file := filepath.Join(fullpath, name, "module.yaml")
 	yfile, err := ioutil.ReadFile(module_yaml_file)
@@ -101,32 +68,6 @@ func ReadModuleYamlFile(fullpath string, name string) ModuleFile {
 	}
 	//fmt.Println(data)
 	return data
-}
-
-type SkillMeta struct {
-	Name       string   `yaml:"Name"`
-	Id         int      `yaml:"Id"`
-	Thumbnails []string `yaml:"Thumbnails"`
-}
-
-type Word struct {
-	Word        string   `yaml:"Word"`
-	Translation string   `yaml:"Translation"`
-	Images      []string `yaml:"Images"`
-}
-
-type Phrase struct {
-	Phrase      string `yaml:"Phrase"`
-	Translation string `yaml:"Translation"`
-}
-
-type MiniDictionary map[string]interface{}
-
-type Skill struct {
-	Meta       SkillMeta                   `yaml:"Skill"`
-	Words      []Word                      `yaml:"New words"`
-	Phrases    []Phrase                    `yaml:"Phrases"`
-	Dictionary map[string][]MiniDictionary `yaml:"Mini-dictionary"`
 }
 
 func getKey(wordPair map[string]interface{}) string {
