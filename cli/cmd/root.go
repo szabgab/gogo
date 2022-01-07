@@ -103,35 +103,100 @@ func ReadModuleYamlFile(fullpath string, name string) ModuleFile {
 	return data
 }
 
-func ReadYamlFiles(fullpath string) [2][2]string {
+type SkillMeta struct {
+	Name       string   `yaml:"Name"`
+	Id         int      `yaml:"Id"`
+	Thumbnails []string `yaml:"Thumbnails"`
+}
+
+type Word struct {
+	Word        string   `yaml:"Word"`
+	Translation string   `yaml:"Translation"`
+	Images      []string `yaml:"Images"`
+}
+
+type Skill struct {
+	Meta  SkillMeta `yaml:"Skill"`
+	Words []Word    `yaml:"New words"`
+}
+
+func ReadSkillYamlFile(fullpath string, module_name string, skill_file string) Skill {
+	skill_yaml_file := filepath.Join(fullpath, module_name, "skills", skill_file)
+	//fmt.Println(skill_yaml_file)
+	yfile, err := ioutil.ReadFile(skill_yaml_file)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	var data Skill
+	err = yaml.Unmarshal(yfile, &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
+}
+
+func ParseSkills(skills []Skill) [][2]string {
+	fmt.Println("parse skills")
+	wordPairs := [][2]string{}
+	//fmt.Println(len(skills))
+	//fmt.Println(skills[0])
+	for _, skill := range skills {
+		for _, word := range skill.Words {
+			//fmt.Println(word.Word)
+			//fmt.Println(word.Translation)
+			wordPairs = append(wordPairs, [2]string{word.Word, word.Translation})
+		}
+	}
+
+	// wordPairs := [][2]string{
+	// 	{"book", "livro"},
+	// 	{"apple", "manzana"},
+	// }
+	return wordPairs
+
+}
+
+// TODO finish reading the skills
+// TODO: tech the first skill
+// TODO also read the md files if they exist
+
+func ReadYamlFiles(fullpath string) [][2]string {
 	course := ReadCourseYamlFile(fullpath)
+	skills := []Skill{}
+	//words := [][2]string{}
 	//fmt.Println(course.Modules)
-	for _, name := range course.Modules {
-		//fmt.Printf("name: %s\n", name)
-		module := ReadModuleYamlFile(fullpath, name)
-		fmt.Println(module.Module.Name)
+	for _, module_name := range course.Modules {
+		//fmt.Printf("name: %s\n", module_name)
+		module := ReadModuleYamlFile(fullpath, module_name)
+		//fmt.Println(module.Module.Name)
+		for _, skill_name := range module.Skills {
+			skill := ReadSkillYamlFile(fullpath, module_name, skill_name)
+			//fmt.Println(skill.Meta.Name)
+			skills = append(skills, skill)
+		}
 	}
+	wordPairs := ParseSkills(skills)
+	//fmt.Println(wordPairs[0])
+	//fmt.Println("----------")
+	//os.Exit(0)
 
-	os.Exit(0)
-
-	cases := [2][2]string{
-		{"book", "livro"},
-		{"apple", "manzana"},
-	}
 	//fmt.Println(len(cases))
-	return cases
+	return wordPairs
 }
 
 func RunSession(fullpath string) {
 	cases := ReadYamlFiles(fullpath)
 	PrintBanner()
+	fmt.Println(len(cases))
+	os.Exit(0)
 
 	for {
 		selected := rand.Intn(len(cases))
 		input := StringPrompt(fmt.Sprintf("%v:", cases[selected][0]))
 		input = strings.Trim(input, "\n")
 		if input == "x" {
-			fmt.Print("Bye")
+			fmt.Println("Bye")
 			return
 		}
 		if input == cases[selected][1] {
