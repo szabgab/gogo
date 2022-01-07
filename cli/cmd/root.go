@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2022 Gabor Szabo <gabor@szabgab.com>
 
 */
 package cmd
@@ -115,9 +115,15 @@ type Word struct {
 	Images      []string `yaml:"Images"`
 }
 
+type Phrase struct {
+	Phrase      string `yaml:"Phrase"`
+	Translation string `yaml:"Translation"`
+}
+
 type Skill struct {
-	Meta  SkillMeta `yaml:"Skill"`
-	Words []Word    `yaml:"New words"`
+	Meta    SkillMeta `yaml:"Skill"`
+	Words   []Word    `yaml:"New words"`
+	Phrases []Phrase  `yaml:"Phrases"`
 }
 
 func ReadSkillYamlFile(fullpath string, module_name string, skill_file string) Skill {
@@ -136,9 +142,10 @@ func ReadSkillYamlFile(fullpath string, module_name string, skill_file string) S
 	return data
 }
 
-func ParseSkills(skills []Skill) [][2]string {
+func ParseSkills(skills []Skill) ([][2]string, [][2]string) {
 	fmt.Println("parse skills")
 	wordPairs := [][2]string{}
+	phrasePairs := [][2]string{}
 	//fmt.Println(len(skills))
 	//fmt.Println(skills[0])
 	for _, skill := range skills {
@@ -147,21 +154,18 @@ func ParseSkills(skills []Skill) [][2]string {
 			//fmt.Println(word.Translation)
 			wordPairs = append(wordPairs, [2]string{word.Word, word.Translation})
 		}
+		for _, phrase := range skill.Phrases {
+			//fmt.Println(phrase)
+			//os.Exit(0)
+			phrasePairs = append(phrasePairs, [2]string{phrase.Phrase, phrase.Translation})
+		}
 	}
 
-	// wordPairs := [][2]string{
-	// 	{"book", "livro"},
-	// 	{"apple", "manzana"},
-	// }
-	return wordPairs
+	return wordPairs, phrasePairs
 
 }
 
-// TODO finish reading the skills
-// TODO: tech the first skill
-// TODO also read the md files if they exist
-
-func ReadYamlFiles(fullpath string) [][2]string {
+func ReadYamlFiles(fullpath string) []Skill {
 	course := ReadCourseYamlFile(fullpath)
 	skills := []Skill{}
 	//words := [][2]string{}
@@ -176,33 +180,100 @@ func ReadYamlFiles(fullpath string) [][2]string {
 			skills = append(skills, skill)
 		}
 	}
-	wordPairs := ParseSkills(skills)
+	return skills
+}
+
+// Given a map of name => value pairs, randomly return one of the names using the values as weights.
+// The values do NOT need to add up to 1 or 100 or anything special.
+func selectChallenge(weights map[string]float64) string {
+	var weightList []float64
+	var actionList []string
+	for action, weight := range weights {
+		weightList = append(weightList, weight)
+		actionList = append(actionList, action)
+	}
+
+	sum := 0.0
+	for _, num := range weightList {
+		sum += num
+	}
+	//fmt.Printf("sum: %v\n", sum)
+	cdf := make([]float64, len(weights))
+	partial := 0.0
+	for ix, num := range weightList {
+		partial += num
+		cdf[ix] = partial / sum
+	}
+	//fmt.Printf("cdf %v\n", cdf)
+	//fmt.Printf("actions %v\n", actionList)
+	selected := rand.Float64()
+	//fmt.Printf("selected %v\n", selected)
+	for ix, num := range cdf {
+		//fmt.Printf("ix: %v num: %v\n", ix, num)
+		if selected < num {
+			return actionList[ix]
+		}
+	}
+	//fmt.Println("return default")
+	return actionList[len(weights)-1]
+}
+
+func runChallenge(cases [][2]string) bool {
+	selected := rand.Intn(len(cases))
+	input := StringPrompt(fmt.Sprintf("%v:", cases[selected][0]))
+	input = strings.Trim(input, "\n")
+	if input == "x" {
+		fmt.Println("Bye")
+		return true
+	}
+	if input == cases[selected][1] {
+		fmt.Println("+")
+	} else {
+		fmt.Println("-")
+		fmt.Println(cases[selected][1])
+		input = StringPrompt("try again:")
+		input = strings.Trim(input, "\n")
+		if input == "x" {
+			fmt.Println("Bye")
+			return true
+		}
+		if input == cases[selected][1] {
+			fmt.Println("++")
+		} else {
+			fmt.Println("-")
+		}
+	}
+	fmt.Println("")
+	return false
+}
+
+func RunSession(fullpath string) {
+	skills := ReadYamlFiles(fullpath)
+	wordPairs, phrasePairs := ParseSkills(skills)
 	//fmt.Println(wordPairs[0])
 	//fmt.Println("----------")
 	//os.Exit(0)
 
-	//fmt.Println(len(cases))
-	return wordPairs
-}
-
-func RunSession(fullpath string) {
-	cases := ReadYamlFiles(fullpath)
 	PrintBanner()
-	fmt.Println(len(cases))
-	os.Exit(0)
+
+	weights := map[string]float64{
+		"word-source-to-target":   0.5,
+		"word-target-to-source":   0.5,
+		"phrase-source-to-target": 0.5,
+		"phrase-target-to-source": 0.5,
+	}
 
 	for {
-		selected := rand.Intn(len(cases))
-		input := StringPrompt(fmt.Sprintf("%v:", cases[selected][0]))
-		input = strings.Trim(input, "\n")
-		if input == "x" {
-			fmt.Println("Bye")
-			return
+		challengeName := selectChallenge(weights)
+		if challengeName == "word-source-to-target" {
+			if runChallenge(wordPairs) {
+				os.Exit(0)
+			}
 		}
-		if input == cases[selected][1] {
-			fmt.Println("+")
-		} else {
-			fmt.Println("-")
+		if challengeName == "phrase-source-to-target" {
+			if runChallenge(phrasePairs) {
+				os.Exit(0)
+			}
 		}
 	}
 }
