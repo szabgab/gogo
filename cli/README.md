@@ -36,5 +36,26 @@ go run main.go
 go mod init github.com/szabgab/gogo/cli
 cobra init
 go get gopkg.in/yaml.v3
+
+
+go get fyne.io/fyne/v2/cmd/fyne
+go get fyne.io/fyne/v2
 ```
 
+Error
+
+```
+/usr/bin/ld: cannot find -lXxf86vm
+```
+
+Sollution
+
+```
+sudo apt-get install libxxf86vm-dev
+```
+
+Explanations
+
+* [CLI](https://dev.to/aurelievache/learning-go-by-examples-part-3-create-a-cli-app-in-go-1h43)
+* [GUI](https://dev.to/aurelievache/learning-go-by-examples-part-7-create-a-cross-platform-gui-desktop-app-in-go-44j1)
+* [Fyne](https://fyne.io/)
