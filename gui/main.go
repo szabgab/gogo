@@ -1,33 +1,30 @@
 package main
 
 import (
-	"fmt"
+	"time"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
 
 func main() {
-	a := app.New()
-	w := a.NewWindow("Hello")
+	myApp := app.New()
+	myWindow := myApp.NewWindow("Hello")
+	myWindow.SetContent(widget.NewLabel("Hello"))
 
-	hello := widget.NewLabel("Hello Fyne!")
-	input := widget.NewEntry()
-	selector := widget.NewSelect([]string{}, func(name string) { fmt.Printf("Selected %v\n", name) })
-	btn := widget.NewButton("Add list", func() {
-		//fmt.Println(input.Text)
-		selector.Options = []string{"Apple", "Banana", "Peach", "Watermelon"}
+	go showAnother(myApp)
+	myWindow.ShowAndRun()
+}
 
-		fmt.Println(selector.Selected)
-		//hello.SetText(input.Text)
-	})
-	w.SetContent(container.NewVBox(
-		hello,
-		selector,
-		input,
-		btn),
-	)
+func showAnother(a fyne.App) {
+	time.Sleep(time.Second * 5)
 
-	w.ShowAndRun()
+	win := a.NewWindow("Shown later")
+	win.SetContent(widget.NewLabel("5 seconds later"))
+	win.Resize(fyne.NewSize(200, 200))
+	win.Show()
+
+	time.Sleep(time.Second * 2)
+	win.Close()
 }
