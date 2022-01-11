@@ -9,9 +9,11 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var myWindow fyne.Window
+
 func main() {
 	myApp := app.New()
-	myWindow := myApp.NewWindow("Hello")
+	myWindow = myApp.NewWindow("Hello")
 
 	label := widget.NewLabel("Hello")
 	btn := widget.NewButton("Open", func() {
