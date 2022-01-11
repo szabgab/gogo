@@ -11,11 +11,14 @@ func main() {
 	w := a.NewWindow("Hello")
 
 	hello := widget.NewLabel("Hello Fyne!")
+	input := widget.NewEntry()
 	btn := widget.NewButton("Hi!", func() {
-		hello.SetText("Welcome :)")
+		//fmt.Println(input.Text)
+		hello.SetText(input.Text)
 	})
 	w.SetContent(container.NewVBox(
 		hello,
+		input,
 		btn),
 	)
 
