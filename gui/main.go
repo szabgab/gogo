@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -12,6 +13,31 @@ import (
 var myWindow fyne.Window
 var cnt int
 var cases = [][]string{}
+var currentCourse string
+
+const coursesURL = "https://github.szabgab.com/lili/courses.json"
+
+func getCourses() {
+	resource, err := fyne.LoadResourceFromURLString(coursesURL)
+	if err != nil {
+		log.Println("Error: %v", err)
+		//showError(err)
+	}
+	showError("Error")
+	fmt.Println(resource)
+}
+
+func showError(text string) {
+	label := widget.NewLabel(text)
+	errorView := container.NewVBox(label)
+	myWindow.SetContent(errorView)
+}
+
+func showSplashScreen() {
+	label := widget.NewLabel("Welcome. Please wait")
+	splashView := container.NewVBox(label)
+	myWindow.SetContent(splashView)
+}
 
 func showMain() {
 	label := widget.NewLabel("Hello")
@@ -48,7 +74,9 @@ func pressButton() {
 
 func main() {
 	myApp := app.New()
-	myWindow = myApp.NewWindow("Hello")
+	myWindow = myApp.NewWindow("GoGo")
+
+	readConfig()
 
 	cases = [][]string{
 		[]string{"apple", "banana", "peach"},
@@ -56,6 +84,6 @@ func main() {
 	}
 	cnt = 0
 
-	showMain()
+	showSplashScreen()
 	myWindow.ShowAndRun()
 }
