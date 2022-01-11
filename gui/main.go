@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -14,18 +13,9 @@ var myWindow fyne.Window
 var cnt int
 var cases = [][]string{}
 var currentCourse string
+var allCourses []string
 
 const coursesURL = "https://github.szabgab.com/lili/courses.json"
-
-func getCourses() {
-	resource, err := fyne.LoadResourceFromURLString(coursesURL)
-	if err != nil {
-		log.Println("Error: %v", err)
-		//showError(err)
-	}
-	showError("Error")
-	fmt.Println(resource)
-}
 
 func showError(text string) {
 	label := widget.NewLabel(text)
@@ -73,11 +63,18 @@ func pressButton() {
 }
 
 func main() {
+	var err error
+
 	myApp := app.New()
 	myWindow = myApp.NewWindow("GoGo")
 
-	readConfig()
-
+	currentCourse, allCourses, err = readConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(allCourses) == 0 {
+		go downloadListOfCourses()
+	}
 	cases = [][]string{
 		[]string{"apple", "banana", "peach"},
 		[]string{"dolphin", "ant"},
