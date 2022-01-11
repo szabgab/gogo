@@ -14,9 +14,11 @@ func main() {
 
 	hello := widget.NewLabel("Hello Fyne!")
 	input := widget.NewEntry()
-	selector := widget.NewSelect([]string{"Apple", "Banana", "Peach", "Watermelon"}, func(name string) { fmt.Printf("Selected %v\n", name) })
-	btn := widget.NewButton("Hi!", func() {
+	selector := widget.NewSelect([]string{}, func(name string) { fmt.Printf("Selected %v\n", name) })
+	btn := widget.NewButton("Add list", func() {
 		//fmt.Println(input.Text)
+		selector.Options = []string{"Apple", "Banana", "Peach", "Watermelon"}
+
 		fmt.Println(selector.Selected)
 		//hello.SetText(input.Text)
 	})
