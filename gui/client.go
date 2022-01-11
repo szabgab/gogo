@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 )
 
 func downloadListOfCourses() {
+	fmt.Println("download courses")
 	//resource, err := fyne.LoadResourceFromURLString(coursesURL)
 	var err error
 	var resp *http.Response

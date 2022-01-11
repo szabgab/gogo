@@ -19,6 +19,12 @@ go get: added fyne.io/fyne/v2 v2.1.2
 ````
 
 
+### TODO
+
+* Download the content of a course
+* From the current course page allow the user to go to the language selector page to switch to another language
+
+
 ### App starts
 * If we already have a selected course then go to the course page
 * If not selected course, but we alread have a list of courses then show the course selector

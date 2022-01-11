@@ -13,7 +13,7 @@ var myWindow fyne.Window
 var cnt int
 var cases = [][]string{}
 var currentCourse string
-var allCourses []string
+var allCourses Courses
 
 const coursesURL = "https://github.szabgab.com/lili/courses.json"
 
@@ -24,6 +24,7 @@ func showError(text string) {
 }
 
 func showSplashScreen() {
+	fmt.Println("splash screen")
 	label := widget.NewLabel("Welcome. Please wait")
 	splashView := container.NewVBox(label)
 	myWindow.SetContent(splashView)
@@ -37,6 +38,31 @@ func showMain() {
 		btn)
 
 	myWindow.SetContent(mainView)
+}
+
+func showCourseSelector() {
+	var options []string
+	fmt.Println("show course selector")
+
+	label := widget.NewLabel("Select the course")
+	selector := widget.NewSelect([]string{}, func(selected string) {})
+	btn := widget.NewButton("Start", func() {
+		fmt.Println("select button pressed")
+		fmt.Println(selector.Selected)
+		currentCourse = selector.Selected
+		saveSelectedCourse(selector.Selected)
+	})
+	languageSelectorView := container.NewVBox(
+		label,
+		selector,
+		btn)
+	for key, _ := range allCourses {
+		fmt.Println(key)
+		options = append(options, key)
+	}
+	selector.Options = options
+
+	myWindow.SetContent(languageSelectorView)
 }
 
 func pressButton() {
@@ -62,6 +88,17 @@ func pressButton() {
 	myWindow.SetContent(buttonsView)
 }
 
+func showCurrentCourse() {
+	fmt.Println("show current course")
+	label := widget.NewLabel("Welcome to the " + currentCourse + " course")
+	btn := widget.NewButton("Open", pressButton)
+	mainView := container.NewVBox(
+		label,
+		btn)
+
+	myWindow.SetContent(mainView)
+}
+
 func main() {
 	var err error
 
@@ -75,12 +112,20 @@ func main() {
 	if len(allCourses) == 0 {
 		go downloadListOfCourses()
 	}
+
 	cases = [][]string{
 		[]string{"apple", "banana", "peach"},
 		[]string{"dolphin", "ant"},
 	}
 	cnt = 0
 
-	showSplashScreen()
+	if currentCourse != "" {
+		showCurrentCourse()
+	} else if len(allCourses) > 0 {
+		showCourseSelector()
+	} else {
+		showSplashScreen()
+	}
+
 	myWindow.ShowAndRun()
 }
