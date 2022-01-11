@@ -6,17 +6,21 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+func setText(obj widget.Label) {
+	obj.SetText("Welcome :)")
+}
 func main() {
 	a := app.New()
 	w := a.NewWindow("Hello")
 
 	hello := widget.NewLabel("Hello Fyne!")
+	btn := widget.NewButton("Hi!", func() {
+		setText(*hello)
+	})
 	w.SetContent(container.NewVBox(
 		hello,
-		widget.NewButton("Hi!", func() {
-			hello.SetText("Welcome :)")
-		}),
-	))
+		btn),
+	)
 
 	w.ShowAndRun()
 }
